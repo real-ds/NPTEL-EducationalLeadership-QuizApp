@@ -92,6 +92,22 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -409,6 +425,90 @@
             margin-top: 0.5rem;
         }
 
+        /* Leaderboard styles */
+        .leaderboard-container {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .leaderboard-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .leaderboard-table thead {
+            background-color: #f3f4f6;
+        }
+
+        .leaderboard-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #d1d5db;
+        }
+
+        .leaderboard-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .leaderboard-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #000;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #e5a572);
+            color: #fff;
+        }
+
+        .rank-other {
+            background-color: #6b7280;
+        }
+
+        .current-user {
+            background-color: #dbeafe !important;
+            font-weight: 600;
+        }
+
+        .no-leaderboard {
+            text-align: center;
+            color: #6b7280;
+            padding: 2rem;
+            font-style: italic;
+        }
+
         @media (max-width: 640px) {
             .container {
                 padding: 1rem;
@@ -433,6 +533,15 @@
             .nav-buttons button {
                 width: 100%;
             }
+
+            .leaderboard-table {
+                font-size: 0.875rem;
+            }
+
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -452,6 +561,11 @@
                         <option value="all">All Weeks (120+ Questions)</option>
                         <!-- Options will be populated by JS -->
                     </select>
+                </div>
+
+                <div class="form-group" id="name-input-group" style="display: none;">
+                    <label for="user-name">Enter Your Name (for Leaderboard):</label>
+                    <input type="text" id="user-name" placeholder="Your name" maxlength="30">
                 </div>
 
                 <div class="btn-grid">
@@ -508,11 +622,20 @@
                     <p class="score-label">Your Score:</p>
                     <p id="score-text" class="score-value">0 / 0</p>
                     <p id="score-percentage" class="score-percentage">(0%)</p>
+                    <p id="time-taken" class="score-label" style="margin-top: 1rem;"></p>
                 </div>
 
                 <h3>Review Your Answers:</h3>
                 <div id="results-breakdown" class="results-breakdown">
                     <!-- Results breakdown will be populated by JS -->
+                </div>
+
+                <!-- Leaderboard Section -->
+                <div id="leaderboard-section" class="leaderboard-container hidden">
+                    <h3 class="leaderboard-title">🏆 Leaderboard - All Weeks Test</h3>
+                    <div id="leaderboard-content">
+                        <!-- Leaderboard will be populated by JS -->
+                    </div>
                 </div>
 
                 <button id="restart-quiz" class="btn-primary w-full mt-2">Back to Menu</button>
@@ -2181,6 +2304,8 @@
         let currentQuestions = [];
         let currentQuestionIndex = 0;
         let userAnswers = []; // For test mode
+        let startTime = null; // Timer for test mode
+        let userName = ''; // User name for leaderboard
 
         // --- DOM ELEMENTS ---
         const modeSelectionEl = document.getElementById('mode-selection');
@@ -2204,6 +2329,11 @@
         const scorePercentageEl = document.getElementById('score-percentage');
         const resultsBreakdownEl = document.getElementById('results-breakdown');
         const restartQuizBtn = document.getElementById('restart-quiz');
+        const nameInputGroup = document.getElementById('name-input-group');
+        const userNameInput = document.getElementById('user-name');
+        const timeTakenEl = document.getElementById('time-taken');
+        const leaderboardSection = document.getElementById('leaderboard-section');
+        const leaderboardContent = document.getElementById('leaderboard-content');
 
         // --- FUNCTIONS ---
 
@@ -2225,6 +2355,15 @@
             
             submitTestBtn.addEventListener('click', submitTest);
             toggleSolutionBtn.addEventListener('click', toggleSolution);
+
+            // Show/hide name input based on week selection
+            weekSelectEl.addEventListener('change', function() {
+                if (weekSelectEl.value === 'all') {
+                    nameInputGroup.style.display = 'block';
+                } else {
+                    nameInputGroup.style.display = 'none';
+                }
+            });
         }
 
         /**
@@ -2248,6 +2387,19 @@
         function startQuiz(mode) {
             currentMode = mode;
             const selectedWeek = weekSelectEl.value;
+            
+            // For All Weeks Test mode, get user name
+            if (mode === 'test' && selectedWeek === 'all') {
+                userName = userNameInput.value.trim();
+                if (!userName) {
+                    userName = 'Anonymous';
+                }
+                // Start timer
+                startTime = new Date();
+            } else {
+                userName = '';
+                startTime = null;
+            }
             
             // Filter questions based on selected week
             if (selectedWeek === 'all') {
@@ -2437,6 +2589,13 @@
             let score = 0;
             resultsBreakdownEl.innerHTML = ''; // Clear previous results
 
+            // Calculate time taken if it's All Weeks test
+            let timeTaken = 0;
+            if (startTime) {
+                const endTime = new Date();
+                timeTaken = Math.floor((endTime - startTime) / 1000); // Time in seconds
+            }
+
             currentQuestions.forEach((question, index) => {
                 const userAnswer = userAnswers[index];
                 const isCorrect = (userAnswer === question.correctAnswer);
@@ -2469,6 +2628,24 @@
             scoreTextEl.textContent = `${score} / ${currentQuestions.length}`;
             scorePercentageEl.textContent = `(${percentage}%)`;
 
+            // Display time taken if applicable
+            if (startTime) {
+                const minutes = Math.floor(timeTaken / 60);
+                const seconds = timeTaken % 60;
+                timeTakenEl.textContent = `Time Taken: ${minutes}m ${seconds}s`;
+                timeTakenEl.style.display = 'block';
+
+                // Save to leaderboard
+                saveToLeaderboard(userName, score, currentQuestions.length, percentage, timeTaken);
+                
+                // Display leaderboard
+                displayLeaderboard();
+                leaderboardSection.classList.remove('hidden');
+            } else {
+                timeTakenEl.style.display = 'none';
+                leaderboardSection.classList.add('hidden');
+            }
+
             // Change color based on score
             scoreTextEl.classList.remove('medium', 'low');
             if (percentage >= 70) {
@@ -2491,6 +2668,93 @@
             resultsContainerEl.classList.add('hidden');
             quizContainerEl.classList.add('hidden');
             modeSelectionEl.classList.remove('hidden');
+            
+            // Reset name input
+            userNameInput.value = '';
+        }
+
+        /**
+         * Saves the test result to the leaderboard in localStorage.
+         */
+        function saveToLeaderboard(name, score, total, percentage, time) {
+            // Get existing leaderboard data
+            let leaderboard = JSON.parse(localStorage.getItem('quizLeaderboard')) || [];
+            
+            // Add new entry
+            const entry = {
+                name: name,
+                score: score,
+                total: total,
+                percentage: percentage,
+                time: time,
+                timestamp: new Date().toISOString()
+            };
+            
+            leaderboard.push(entry);
+            
+            // Save back to localStorage
+            localStorage.setItem('quizLeaderboard', JSON.stringify(leaderboard));
+        }
+
+        /**
+         * Displays the leaderboard sorted by highest score and quickest time.
+         */
+        function displayLeaderboard() {
+            // Get leaderboard data
+            let leaderboard = JSON.parse(localStorage.getItem('quizLeaderboard')) || [];
+            
+            if (leaderboard.length === 0) {
+                leaderboardContent.innerHTML = '<p class="no-leaderboard">No entries yet. Be the first to complete the test!</p>';
+                return;
+            }
+            
+            // Sort by percentage (descending) first, then by time (ascending)
+            leaderboard.sort((a, b) => {
+                if (b.percentage !== a.percentage) {
+                    return b.percentage - a.percentage;
+                }
+                return a.time - b.time;
+            });
+            
+            // Create table
+            let tableHTML = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            leaderboard.forEach((entry, index) => {
+                const rank = index + 1;
+                const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+                const minutes = Math.floor(entry.time / 60);
+                const seconds = entry.time % 60;
+                const isCurrentUser = entry.name === userName && entry.percentage === parseInt(scorePercentageEl.textContent.match(/\d+/)[0]);
+                
+                tableHTML += `
+                    <tr class="${isCurrentUser ? 'current-user' : ''}">
+                        <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                        <td>${entry.name}${isCurrentUser ? ' (You)' : ''}</td>
+                        <td>${entry.score}/${entry.total}</td>
+                        <td>${entry.percentage}%</td>
+                        <td>${minutes}m ${seconds}s</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            leaderboardContent.innerHTML = tableHTML;
         }
 
         /**
