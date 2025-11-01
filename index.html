@@ -559,6 +559,7 @@
                     <label for="week-select">Select Topic (Week):</label>
                     <select id="week-select">
                         <option value="all">All Weeks (120+ Questions)</option>
+                        <option value="1" selected>Week 1</option>
                         <!-- Options will be populated by JS -->
                     </select>
                 </div>
@@ -2374,6 +2375,9 @@
             const weeks = [...new Set(quizData.map(q => q.week))].sort((a, b) => a - b);
             
             weeks.forEach(week => {
+                // Skip Week 1 as it's already added in HTML with selected attribute
+                if (week === 1) return;
+                
                 const option = document.createElement('option');
                 option.value = week;
                 option.textContent = `Week ${week}`;
