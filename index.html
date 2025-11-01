@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Leadership Quiz</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for quiz elements */
+        .option-btn.selected {
+            background-color: #e0f2fe; /* light-blue-100 */
+            border-color: #38bdf8; /* light-blue-400 */
+            color: #0284c7; /* light-blue-700 */
+        }
+        .option-btn.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #4ade80; /* green-400 */
+            color: #166534; /* green-800 */
+        }
+        .option-btn.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #f87171; /* red-400 */
+            color: #991b1b; /* red-800 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <!-- Main Application Container -->
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-3xl min-h-screen flex items-center">
+        <div class="bg-white w-full rounded-xl shadow-2xl p-6 md:p-10">
+
+            <!-- 1. Mode Selection Screen (Initial View) -->
+            <div id="mode-selection">
+                <h1 class="text-3xl md:text-4xl font-bold text-center text-blue-700 mb-8">Educational Leadership Quiz</h1>
+                <p class="text-center text-lg text-gray-600 mb-8">Choose your mode and topic to begin.</p>
+                
+                <div class="mb-6">
+                    <label for="week-select" class="block text-sm font-medium text-gray-700 mb-2">Select Topic (Week):</label>
+                    <select id="week-select" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">All Weeks (120+ Questions)</option>
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button id="start-practice" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                        <span class="text-xl">Practice Mode</span>
+                        <span class="block text-sm font-light">Get instant feedback & solutions.</span>
+                    </button>
+                    <button id="start-test" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-lg transition-transform transform hover:scale-105 shadow-lg">
+                        <span class="text-xl">Test Mode</span>
+                        <span class="block text-sm font-light">See your score at the end.</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Quiz View (Hidden) -->
+            <div id="quiz-container" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="quiz-title" class="text-2xl font-bold text-blue-700">Quiz</h2>
+                    <button id="back-to-menu" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded-lg">&larr; Back to Menu</button>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg shadow-inner mb-6">
+                    <p id="question-progress" class="text-right text-sm font-medium text-gray-500 mb-2">Question 1 of 10</p>
+                    <p id="question-text" class="text-lg md:text-xl font-semibold text-gray-900">This is the question text?</p>
+                </div>
+
+                <div id="options-container" class="grid grid-cols-1 gap-3">
+                    <!-- Option buttons will be populated by JS -->
+                </div>
+
+                <!-- Practice Mode Solution Area -->
+                <div id="practice-solution-area" class="mt-6 hidden">
+                    <button id="toggle-solution-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow">Show Solution</button>
+                    <div id="solution-text" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg mt-4">
+                        <!-- Solution text will go here -->
+                    </div>
+                </div>
+
+                <!-- Quiz Navigation -->
+                <div class="flex justify-between mt-8">
+                    <button id="prev-question" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg shadow transition-opacity" disabled>Previous</button>
+                    <button id="next-question" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow">Next</button>
+                    <button id="submit-test" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow">Submit Test</button>
+                </div>
+            </div>
+
+            <!-- 3. Results View (Hidden) -->
+            <div id="results-container" class="hidden">
+                <h2 class="text-3xl font-bold text-center text-blue-700 mb-6">Test Results</h2>
+                
+                <div class="text-center mb-8">
+                    <p class="text-xl text-gray-600">Your Score:</p>
+                    <p id="score-text" class="text-6xl font-extrabold text-green-600">0 / 0</p>
+                    <p id="score-percentage" class="text-2xl font-semibold text-gray-700">(0%)</p>
+                </div>
+
+                <h3 class="text-2xl font-semibold mb-4">Review Your Answers:</h3>
+                <div id="results-breakdown" class="space-y-6 border-t border-gray-200 pt-6">
+                    <!-- Results breakdown will be populated by JS -->
+                </div>
+
+                <button id="restart-quiz" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg">Back to Menu</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        // All questions extracted from the provided PDF
+        const quizData = [
+          // Week 1
+          {
+            week: 1,
+            question: "A leader can be anyone who serves as an effective",
+            options: [
+              "patriarch",
+              "narcissist",
+              "social change agent",
+              "politician",
+              "manipulator"
+            ],
+            correctAnswer: "social change agent",
+            solution: "Please go through lecture notes of week-1 (slide no.02) for better understanding."
+          },
+          {
+            week: 1,
+            question: "____ is the central concept in the case of leadership.",
+            options: [
+              "Authority",
+              "Influence",
+              "Coercion",
+              "Knowledge",
+              "Relationship"
+            ],
+            correctAnswer: "Influence",
+            solution: "Please go through lecture notes of week-1 (slide no.03) for better understanding."
+          },
+          {
+            week: 1,
+            question: "Which of the following is the 21st century slogan for leadership that is replacing earlier emphasis on instructional leadership?",
+            options: [
+              "'Leadership for learning'",
+              "'Leadership for power'",
+              "'Leadership for control'",
+              "'Leadership for educational institutes'",
+              "'Leadership for society'"
+            ],
+            correctAnswer: "'Leadership for learning'",
+            solution: "Please go through lecture notes of week-1 (slide no.05) for better understanding."
+          },
+          {
+            week: 1,
+            question: "The current focus of educational leadership is to produce ____ who can construct effective solutions for critical social problems.",
+            options: [
+              "politicians",
+              "transactional leaders",
+              "transformational leaders",
+              "negotiable leaders",
+              "kings"
+            ],
+            correctAnswer: "transformational leaders",
+            solution: "Please go through lecture notes of week-1 (slide no.05) for better understanding."
+          },
+          {
+            week: 1,
+            question: "21st century leaders need to have ____ in addition to new knowledge and skills.",
+            options: [
+              "low maturity",
+              "high emotional wisdom",
+              "low spiritual wisdom",
+              "high emotional immaturity",
+              "low adjustability"
+            ],
+            correctAnswer: "high emotional wisdom",
+            solution: "Please go through lecture notes of week-1 (slide no.02) for better understanding."
+          },
+          {
+            week: 1,
+            question: "Authentic learning is about",
+            options: [
+              "developing the capability to give one's unique contribution to others",
+              "only taking new knowledge & skills for oneself",
+              "exclusively focusing on personal growth",
+              "learning from trustable sources",
+              "None of the above"
+            ],
+            correctAnswer: "developing the capability to give one's unique contribution to others",
+            solution: "Please go through lecture notes of week-1 (slide no.12) for better understanding."
+          },
+          {
+            week: 1,
+            question: "Which of the following is not linked with leadership?",
+            options: [
+              "Influence",
+              "Values",
+              "Ethics",
+              "Vision",
+              "Oppression"
+            ],
+            correctAnswer: "Oppression",
+            solution: "Please go through lecture notes of week-1 (slide no.03) for better understanding."
+          },
+          {
+            week: 1,
+            question: "One of the goals of present day educational leadership is to build a ____ as a ____",
+            options: [
+              "toxic culture, treatment for the organization",
+              "pessimist culture, way of life",
+              "learning culture, method of forcing employees",
+              "learning culture, way of life",
+              "college, way of life"
+            ],
+            correctAnswer: "learning culture, way of life",
+            solution: "Please go through lecture notes of week-1 (slide no.05) for better understanding."
+          },
+          {
+            week: 1,
+            question: "An issue of educational leadership is providing a ____ driven vision.",
+            options: [
+              "power",
+              "politics",
+              "value",
+              "control",
+              "authority"
+            ],
+            correctAnswer: "value",
+            solution: "Please go through lecture notes of week-1 (slide no.06) for better understanding."
+          },
+          {
+            week: 1,
+            question: "In the PRES model of authentic leadership, S stands for",
+            options: [
+              "self-expression",
+              "self-control",
+              "self-love",
+              "self-knowledge",
+              "stability"
+            ],
+            correctAnswer: "self-knowledge",
+            solution: "Please go through lecture notes of week-1 (slide no.14) for better understanding."
+          },
+          {
+            week: 1,
+            question: "Capable Educational leaders need to possess---",
+            options: [
+              "Good listening skills",
+              "Emotional intelligence",
+              "Ability to generate positive changes",
+              "Ability for critical reflection & future vision",
+              "All the above"
+            ],
+            correctAnswer: "All the above",
+            solution: "Please go through lecture notes of week-1 (slide no.10) for better understanding."
+          },
+          {
+            week: 1,
+            question: "Positional authority is independent of Leadership but not related to---",
+            options: [
+              "Influencing people",
+              "Judging others",
+              "Intention to achieve",
+              "Values, ethics & vision",
+              "Policy making"
+            ],
+            correctAnswer: "Judging others",
+            solution: "Please go through lecture notes of week-1 (slide no.03) for better understanding."
+          },
+
+          // Week 2
+          {
+            week: 2,
+            question: "Professional Education is concerned with the following main aspects of development except",
+            options: [
+              "professional knowledge base",
+              "ability to exert control",
+              "competence in professional action",
+              "development of reflection"
+            ],
+            correctAnswer: "ability to exert control",
+            solution: "Please go through lecture notes of week-2 (slide no.05) for better understanding."
+          },
+          {
+            week: 2,
+            question: "CPD stands for",
+            options: [
+              "Collaborative Professional Development",
+              "Continuous Professional Development",
+              "Continuous Pedagogical Development",
+              "Critical Personal Development",
+              "None of the above"
+            ],
+            correctAnswer: "Continuous Professional Development",
+            solution: "Please go through lecture notes of week-2 (slide no.07) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Which of the following is not a characteristic of 21st century learners?",
+            options: [
+              "Tech-savvy",
+              "Creative",
+              "Networkers",
+              "Reliant on media",
+              "Maladaptive"
+            ],
+            correctAnswer: "Maladaptive",
+            solution: "Please go through lecture notes of week-2 (slide no.10) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Which of the following is a characteristic of 21st century educators?",
+            options: [
+              "self-centric",
+              "resistor",
+              "adapting to ICT",
+              "fixed on one curriculum or learning style",
+              "self-absorbed"
+            ],
+            correctAnswer: "adapting to ICT",
+            solution: "Please go through lecture notes of week-2 (slide no.12) for better understanding."
+          },
+          {
+            week: 2,
+            question: "In learner-centric systems, active learning can be encouraged by using",
+            options: [
+              "game-based learning",
+              "mobile apps",
+              "flipped classes",
+              "None of the above",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-2 (slide no.16) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Thinking about teaching & always improving it in innovative ways is called",
+            options: [
+              "Reflective practice",
+              "Retractive practice",
+              "Refractive practice",
+              "Learning pedagogy",
+              "None of the above"
+            ],
+            correctAnswer: "Reflective practice",
+            solution: "Please go through lecture notes of week-2 (slide no.19) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Which of the following is not one of the steps in the 5-step model of problem solving?",
+            options: [
+              "Hypothesizing",
+              "Reasoning",
+              "Putting up questions",
+              "Testing",
+              "Incubation"
+            ],
+            correctAnswer: "Incubation",
+            solution: "Please go through lecture notes of week-2 (slide no.20) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Highest level of reflection leads to",
+            options: [
+              "worthwhileness",
+              "worthlessness",
+              "worthiness",
+              "reflective actualization",
+              "none of the above"
+            ],
+            correctAnswer: "worthwhileness",
+            solution: "Please go through lecture notes of week-2 (slide no.21) for better understanding."
+          },
+          {
+            week: 2,
+            question: "Which of the following is not one of the perspectives given by Brookfield for reflective practice?",
+            options: [
+              "practitioners",
+              "colleagues",
+              "society",
+              "learners",
+              "established theory"
+            ],
+            correctAnswer: "society",
+            solution: "Please go through lecture notes of week-2 (slide no.21) for better understanding."
+          },
+          {
+            week: 2,
+            question: "The ____ area of the Johari window refers to the area that you are unaware of and that can be reduced by asking others for more transparent feedback.",
+            options: [
+              "open",
+              "blind",
+              "hidden",
+              "unknown",
+              "none of the above"
+            ],
+            correctAnswer: "blind",
+            solution: "Please go through lecture notes of week-2 (slide no.26-27) for better understanding."
+          },
+          {
+            week: 2,
+            question: "'Problem-based learning' focuses on",
+            options: [
+              "Course completion & examination",
+              "Students need to demonstrate curricular activities",
+              "Teachers to teach less and learn more",
+              "Students need to demonstrate domain-specific knowledge",
+              "Certification of degrees by colleges",
+              "Students learn through analyzing & solving a problem"
+            ],
+            correctAnswer: "Students learn through analyzing & solving a problem",
+            solution: "Please go through lecture notes of week-2 (slide no.34) for better understanding."
+          },
+          {
+            week: 2,
+            question: "The concept of Continuous Professional development comprehensively means---",
+            options: [
+              "Pedagogical skill development",
+              "Professional action",
+              "Updated curricula & technology",
+              "Academic environment",
+              "Enhancing effectiveness as a researcher & teacher",
+              "Qualifying for Teaching license"
+            ],
+            correctAnswer: "Enhancing effectiveness as a researcher & teacher",
+            solution: "Please go through lecture notes of week-2 (slide no.07) for better understanding."
+          },
+
+          // Week 3
+          {
+            week: 3,
+            question: "____ in education are valuable code of conducts exhibited & enforced by teachers in relation to the students, colleges, community and to oneself for positive educational consequences.",
+            options: [
+              "Professional ethics",
+              "Formal rules",
+              "Violations",
+              "Professional relations",
+              "Committee relations"
+            ],
+            correctAnswer: "Professional ethics",
+            solution: "Please go through lecture notes of week-3 (slide no.03) for better understanding."
+          },
+          {
+            week: 3,
+            question: "The principles that teachers' Code of Professional Practice is to be based on include.",
+            options: [
+              "accountability",
+              "service to the public",
+              "responsiveness to the Government & the needs of the public",
+              "fairness and integrity",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-3 (slide no.06) for better understanding."
+          },
+          {
+            week: 3,
+            question: "____ of educational institutes leading towards consequences like commercialization of degrees, low quality teaching and no job security is one of the current ethical challenges in the teaching profession.",
+            options: [
+              "Personalization",
+              "Industrialization",
+              "Privatization",
+              "Institutionalization",
+              "None of the above"
+            ],
+            correctAnswer: "Privatization",
+            solution: "Please go through lecture notes of week-3 (slide no.13) for better understanding."
+          },
+          {
+            week: 3,
+            question: "Which of the following are current ethical issues and challenges in the teaching profession?",
+            options: [
+              "Political interference",
+              "Corruption",
+              "Communication and cultural barriers",
+              "Only b and c",
+              "a, b and c"
+            ],
+            correctAnswer: "a, b and c",
+            solution: "Please go through lecture notes of week-3 (slide no.13-15) for better understanding."
+          },
+          {
+            week: 3,
+            question: "Each teacher has an obligation to",
+            options: [
+              "disrespect the opinion that goes against their own",
+              "not care about students",
+              "encourage harassment at workplace",
+              "demonstrate high standards of professional practice",
+              "stay away from parents and guardians"
+            ],
+            correctAnswer: "demonstrate high standards of professional practice",
+            solution: "Please go through lecture notes of week-3 (slide no.08) for better understanding."
+          },
+          {
+            week: 3,
+            question: "The code of professional practice should be",
+            options: [
+              "discriminatory",
+              "updated time to time",
+              "kept the same forever",
+              "optional for a teacher to follow or not",
+              "none of the above"
+            ],
+            correctAnswer: "updated time to time",
+            solution: "Please go through lecture notes of week-3 (slide no.07) for better understanding."
+          },
+          {
+            week: 3,
+            question: "Teachers serve the public interest by the following, except",
+            options: [
+              "favoring certain students over others",
+              "being committed to students' learning",
+              "working in partnership with parents",
+              "exercising reasonable care",
+              "Collaborating with all stakeholders"
+            ],
+            correctAnswer: "favoring certain students over others",
+            solution: "Please go through lecture notes of week-3 (slide no.07) for better understanding."
+          },
+          {
+            week: 3,
+            question: "Teachers should",
+            options: [
+              "ignore specific needs of pupils",
+              "motivate and inspire pupils",
+              "work only in isolation",
+              "not include parents in the process",
+              "decide which pupils they like and which they don't"
+            ],
+            correctAnswer: "motivate and inspire pupils",
+            solution: "Please go through lecture notes of week-3 (slide no.10-12) for better understanding."
+          },
+          {
+            week: 3,
+            question: "The process of ethical teaching should begin from pre-service studentship &",
+            options: [
+              "stop there",
+              "continue for a year",
+              "continue till the teacher gets tired",
+              "continue throughout professional life",
+              "stop when the head asks"
+            ],
+            correctAnswer: "continue throughout professional life",
+            solution: "Please go through lecture notes of week-3 (slide no.18) for better understanding."
+          },
+          {
+            week: 3,
+            question: "At the time of ethical dilemma an inspirational leader should do--",
+            options: [
+              "Clarify the facts & check the data",
+              "Take strategic decision & act upon carefully",
+              "Imagine several options for solutions",
+              "Evaluate options using different approaches",
+              "All the above"
+            ],
+            correctAnswer: "All the above",
+            solution: "Please go through lecture notes of week-3 (slide no.19-20) for better understanding."
+          },
+          {
+            week: 3,
+            question: "The educational leaders also must incorporate ____ as part of their thinking & reasoning as ethics is at the core of a given human enterprise.",
+            options: [
+              "cooperate & collaborate with other agencies",
+              "conditionally work with others",
+              "ethical analysis",
+              "engaging themselves in recreational activities",
+              "none of the above"
+            ],
+            correctAnswer: "ethical analysis",
+            solution: "Please go through lecture notes of week-3 (slide no. 18) for better understanding."
+          },
+
+          // Week 4
+          {
+            week: 4,
+            question: "According to the ability model, emotional intelligence consists of 4 abilities given below, except.",
+            options: [
+              "Perceiving emotions",
+              "Using emotions",
+              "Ignoring emotions",
+              "Understanding emotions",
+              "Managing emotions"
+            ],
+            correctAnswer: "Ignoring emotions",
+            solution: "Please go through lecture notes of week-4 (slide no.04) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Who among the following gave the mixed model of intelligence and focused on the importance of emotional intelligence as compared to IQ?",
+            options: [
+              "Goleman",
+              "Maslow",
+              "Salovey and Mayer",
+              "Watson",
+              "Freud"
+            ],
+            correctAnswer: "Goleman",
+            solution: "Please go through lecture notes of week-4 (slide no.06) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Which leadership style gives the message: 'try this'",
+            options: [
+              "Coercive",
+              "Authoritative",
+              "Democratic",
+              "Affiliative",
+              "Coaching"
+            ],
+            correctAnswer: "Coaching",
+            solution: "Please go through lecture notes of week-4 (slide no.10) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Which of the following is not a trait of transformational leaders?",
+            options: [
+              "Idealized influence",
+              "Inspirational motivation",
+              "Coercive authority",
+              "Individualized consideration",
+              "Intellectual Stimulation"
+            ],
+            correctAnswer: "Coercive authority",
+            solution: "Please go through lecture notes of week-4 (slide no.11) for better understanding."
+          },
+          {
+            week: 4,
+            question: "____ is a social process by which emotions are shared collectively across a group in a social context.",
+            options: [
+              "Social emotion",
+              "Emotional labor",
+              "Emotional regulation",
+              "Emotional socialization",
+              "Emotional contagion"
+            ],
+            correctAnswer: "Emotional contagion",
+            solution: "Please go through lecture notes of week-4 (slide no.18) for better understanding."
+          },
+          {
+            week: 4,
+            question: "____ includes modifying initial feelings by changing the situation or cognitions of the situation",
+            options: [
+              "Response-focused regulation",
+              "Social regulation",
+              "Emotional labor",
+              "Antecedent-focused regulation",
+              "Social awareness"
+            ],
+            correctAnswer: "Antecedent-focused regulation",
+            solution: "Please go through lecture notes of week-4 (slide no.13) for better understanding."
+          },
+          {
+            week: 4,
+            question: "____ is when people change their outward emotional expressions without feeling the actual emotion they show.",
+            options: [
+              "deep acting",
+              "depth acting",
+              "surface acting",
+              "small acting",
+              "none of the above"
+            ],
+            correctAnswer: "surface acting",
+            solution: "Please go through lecture notes of week-4 (slide no.14) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Which of the following leadership styles can result in people get overwhelmed & burnt out",
+            options: [
+              "Pace-setting",
+              "Coaching",
+              "Democratic",
+              "Affiliative",
+              "Authoritative"
+            ],
+            correctAnswer: "Pace-setting",
+            solution: "Please go through lecture notes of week-4 (slide no.10) for better understanding."
+          },
+          {
+            week: 4,
+            question: "____ is the public face of emotion in leadership.",
+            options: [
+              "Emotional awareness",
+              "Social regulation",
+              "Sympathy",
+              "Emotional labor",
+              "None of the above"
+            ],
+            correctAnswer: "Emotional labor",
+            solution: "Please go through lecture notes of week-4 (slide no.12) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Leaders high on empathy will prefer to use",
+            options: [
+              "surface acting",
+              "sympathy",
+              "anger",
+              "deep acting",
+              "coercion"
+            ],
+            correctAnswer: "deep acting",
+            solution: "Please go through lecture notes of week-4 (slide no.15) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Emotional intelligence is a crucial component of",
+            options: [
+              "Analytical intelligence",
+              "Divergent thinking",
+              "Social intelligence",
+              "Convergent thinking",
+              "Creative interests"
+            ],
+            correctAnswer: "Social intelligence",
+            solution: "Please go through lecture notes of week-4 (slide no.5) for better understanding."
+          },
+          {
+            week: 4,
+            question: "Accurately labeling emotion is also called as",
+            options: [
+              "Emotional expertise",
+              "Emotional awareness",
+              "Emotional contagion",
+              "Empathy",
+              "Emotional literacy"
+            ],
+            correctAnswer: "Emotional literacy",
+            solution: "Please go through lecture notes of week-4 (slide no.5) for better understanding."
+          },
+
+          // Week 5
+          {
+            week: 5,
+            question: "____ is the type of diversity in the context of education which refers to the numerical & proportional representation of students from diverse groups in the student population",
+            options: [
+              "Structural diversity",
+              "Numerical diversity",
+              "Proportionate diversity",
+              "Interactional diversity",
+              "Constructional diversity"
+            ],
+            correctAnswer: "Structural diversity",
+            solution: "Please go through lecture notes of week-5 (slide no.05) for better understanding."
+          },
+          {
+            week: 5,
+            question: "Each type of diversity is",
+            options: [
+              "complementary to each other",
+              "competitive in nature",
+              "independent of each other",
+              "detrimental to each other",
+              "none of the above"
+            ],
+            correctAnswer: "complementary to each other",
+            solution: "Please go through lecture notes of week-5 (slide no.06) for better understanding."
+          },
+          {
+            week: 5,
+            question: "____ refers to an understanding that certain common values exist across diverse ethnic groups & group conflict often can be constructive if used appropriately",
+            options: [
+              "Civic engagement",
+              "Compatibility of differences",
+              "Cultural engagement",
+              "Learning outcomes",
+              "Differential engagement"
+            ],
+            correctAnswer: "Compatibility of differences",
+            solution: "Please go through lecture notes of week-5 (slide no.08) for better understanding."
+          },
+          {
+            week: 5,
+            question: "Major transformations in knowledge sector due to globalization and IT revolution include",
+            options: [
+              "virtual universities",
+              "e-courses",
+              "app based learning",
+              "online packages",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-5 (slide no.12) for better understanding."
+          },
+          {
+            week: 5,
+            question: "In India, the Ministry of Human Resource Development has taken some initiatives like implementing NAB, where NAB stands for",
+            options: [
+              "National Award Board",
+              "National Award Bureau",
+              "National Accreditation Bureau",
+              "National Acceptance Board",
+              "National Accreditation Board"
+            ],
+            correctAnswer: "National Accreditation Board",
+            solution: "Please go through lecture notes of week-5 (slide no.13) for better understanding."
+          },
+          {
+            week: 5,
+            question: "Due to escalating fees in developed nations, the students from these countries are choosing to study & take their degrees from",
+            options: [
+              "reputed institutes of developing Asian countries",
+              "online courses",
+              "both a & b",
+              "none of the above"
+            ],
+            correctAnswer: "both a & b",
+            solution: "Please go through lecture notes of week-5 (slide no.18) for better understanding."
+          },
+          {
+            week: 5,
+            question: "Which of the following has been observed to be true for new generation learners?",
+            options: [
+              "expect a pass for anything they submit, irrespective of its quality",
+              "not as self-reliant as the previous generations",
+              "use the peer group reference for making any academic decision like where to enroll & which subject to take",
+              "only c",
+              "a, b and c"
+            ],
+            correctAnswer: "a, b and c",
+            solution: "Please go through lecture notes of week-5 (slide no.19-21) for better understanding."
+          },
+          {
+            week: 5,
+            question: "The higher education sector of which countries is larger than that of India?",
+            options: [
+              "China and the U.S.A.",
+              "Japan and China",
+              "China and Singapore",
+              "USA and Bangladesh",
+              "Canada and Singapore"
+            ],
+            correctAnswer: "China and the U.S.A.",
+            solution: "Please go through lecture notes of week-5 (slide no.23) for better understanding."
+          },
+          {
+            week: 5,
+            question: "Taiwan being the major designer of IT hardware is also considering the making of ____ by merging some of its top technological universities",
+            options: [
+              "'Asian MIT'",
+              "'Asian Oxford'",
+              "'Asian Harvard'",
+              "'Asian Cambridge'",
+              "None of the above"
+            ],
+            correctAnswer: "'Asian MIT'",
+            solution: "Please go through lecture notes of week-5 (slide no.27) for better understanding."
+          },
+          {
+            week: 5,
+            question: "The three major areas to be considered in the pedagogical approach of enhancing students' understanding of international contexts, competition & the meaning of globalization include the following except",
+            options: [
+              "linguistics",
+              "money",
+              "curriculum",
+              "leadership"
+            ],
+            correctAnswer: "money",
+            solution: "Please go through lecture notes of week-5 (slide no.30) for better understanding."
+          },
+
+          // Week 6
+          {
+            week: 6,
+            question: "____ refers to constantly questioning, examining the evidence, arguments, methods & reliability of findings",
+            options: [
+              "Criticism",
+              "Skepticism",
+              "Accountability",
+              "Conviction",
+              "Paradigm"
+            ],
+            correctAnswer: "Skepticism",
+            solution: "Please go through lecture notes of week-6 (slide no.05) for better understanding."
+          },
+          {
+            week: 6,
+            question: "The ____ purpose of educational research concerns gaining familiarity with a relatively new topic and discovering its various dimensions",
+            options: [
+              "exploratory",
+              "descriptive",
+              "explanatory",
+              "evaluation",
+              "none of the above"
+            ],
+            correctAnswer: "exploratory",
+            solution: "Please go through lecture notes of week-6 (slide no.06) for better understanding."
+          },
+          {
+            week: 6,
+            question: "____ is a measure of association that tests whether a relationship exists between two variables",
+            options: [
+              "Experiment",
+              "Survey",
+              "Interview",
+              "Causation",
+              "Correlation"
+            ],
+            correctAnswer: "Correlation",
+            solution: "Please go through lecture notes of week-6 (slide no.08) for better understanding."
+          },
+          {
+            week: 6,
+            question: "____ is any systematic enquiry conducted by teacher researchers, principals, counsellors or any stakeholders in the teaching-learning environment to gather information about how their institutions operate, how they teach and how well their students learn",
+            options: [
+              "Action research",
+              "Correlation",
+              "Reaction research",
+              "Experimentation",
+              "Focus research"
+            ],
+            correctAnswer: "Action research",
+            solution: "Please go through lecture notes of week-6 (slide no.30) for better understanding."
+          },
+          {
+            week: 6,
+            question: "Doctoral research is affected by",
+            options: [
+              "Massification of higher education",
+              "Politics",
+              "Funding sources",
+              "Employer demands",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-6 (slide no.36) for better understanding."
+          },
+          {
+            week: 6,
+            question: "____ pedagogy endorses students' ability to think critically about their education situation which allows them to recognize connections between their individual problems and experiences & the social contexts in which they are embedded",
+            options: [
+              "Criticism",
+              "Critical",
+              "Crucial",
+              "None of the above"
+            ],
+            correctAnswer: "Critical",
+            solution: "Please go through lecture notes of week-6 (slide no.37) for better understanding."
+          },
+          {
+            week: 6,
+            question: "The deep learning skill of citizenship includes the following, except",
+            options: [
+              "global knowledge",
+              "cultural sensitivity",
+              "perseverance",
+              "environmental sustainability"
+            ],
+            correctAnswer: "perseverance",
+            solution: "Please go through lecture notes of week-6 (slide no.41) for better understanding."
+          },
+          {
+            week: 6,
+            question: "Which of the following is not a principle of new pedagogies?",
+            options: [
+              "Partnership & Transparency in Projects' Operating Model",
+              "Continuous Learning & Research",
+              "Mobilization Model to be usable & expandable",
+              "An independent project done in isolation"
+            ],
+            correctAnswer: "An independent project done in isolation",
+            solution: "Please go through lecture notes of week-6 (slide no.43-45) for better understanding."
+          },
+          {
+            week: 6,
+            question: "Which of the following is not a deep learning skill?",
+            options: [
+              "Collaboration",
+              "Creativity and imagination",
+              "Critical thinking",
+              "Communication",
+              "Rigidity"
+            ],
+            correctAnswer: "Rigidity",
+            solution: "Please go through lecture notes of week-6 (slide no.41-42) for better understanding."
+          },
+          {
+            week: 6,
+            question: "New pedagogies require students to create new knowledge & connect it to the world by using the power of",
+            options: [
+              "money",
+              "energy",
+              "digital tools",
+              "books",
+              "libraries"
+            ],
+            correctAnswer: "digital tools",
+            solution: "Please go through lecture notes of week-6 (slide no.39) for better understanding."
+          },
+
+          // Week 7
+          {
+            week: 7,
+            question: "The new paradigms of education advocate for",
+            options: [
+              "'No child left behind'",
+              "Personalized learning assistance",
+              "Quality education to all",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-7 (slide no.02) for better understanding."
+          },
+          {
+            week: 7,
+            question: "Which of the following is true for metacognition?",
+            options: [
+              "It occurs before the cognitive event",
+              "It occurs after the cognitive event",
+              "It occurs simultaneously with the cognitive event",
+              "It can occur before the event, after the event or simultaneously",
+              "none of the above"
+            ],
+            correctAnswer: "It can occur before the event, after the event or simultaneously",
+            solution: "Please go through lecture notes of week-7 (slide no.07) for better understanding."
+          },
+          {
+            week: 7,
+            question: "____ knowledge is knowing about when & why declarative & procedural knowledge are relevant to tasks (effective strategies)",
+            options: [
+              "Conceptual",
+              "Contextual",
+              "Conditional",
+              "Causational",
+              "Creative"
+            ],
+            correctAnswer: "Conditional",
+            solution: "Please go through lecture notes of week-7 (slide no.12) for better understanding."
+          },
+          {
+            week: 7,
+            question: "____ is the fit between meta-cognition & performance",
+            options: [
+              "Calibration",
+              "Meta-cognitive monitoring",
+              "Meta-cognitive control",
+              "Self-regulated learning",
+              "Correlation"
+            ],
+            correctAnswer: "Calibration",
+            solution: "Please go through lecture notes of week-7 (slide no.14) for better understanding."
+          },
+          {
+            week: 7,
+            question: "Which of the following is not a dimension of the learning environment focused on by cognitive apprenticeship?",
+            options: [
+              "Content",
+              "Method",
+              "Sequence",
+              "Sociology",
+              "Communication"
+            ],
+            correctAnswer: "Communication",
+            solution: "Please go through lecture notes of week-7 (slide no.18) for better understanding."
+          },
+          {
+            week: 7,
+            question: "Which of the following is an experiential learning method?",
+            options: [
+              "Role-play",
+              "Visualization",
+              "Simulation",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-7 (slide no.22) for better understanding."
+          },
+          {
+            week: 7,
+            question: "____ learning includes presentation of lessons through multimedia material i.e. text, animation, graphics, video & sound",
+            options: [
+              "Problem-based",
+              "Web-based",
+              "Information-based",
+              "Collaborative",
+              "None of the above"
+            ],
+            correctAnswer: "Web-based",
+            solution: "Please go through lecture notes of week-7 (slide no.38) for better understanding."
+          },
+          {
+            week: 7,
+            question: "Games are based on the theory of ____ as they use fantasy, control, challenge, curiosity & adventure to motivate players.",
+            options: [
+              "fantasy",
+              "extrinsic motivation",
+              "intrinsic motivation",
+              "imagination",
+              "none of the above"
+            ],
+            correctAnswer: "intrinsic motivation",
+            solution: "Please go through lecture notes of week-7 (slide no.46) for better understanding."
+          },
+          {
+            week: 7,
+            question: "Which of the following is an innovative pedagogy of learning?",
+            options: [
+              "Game-based learning",
+              "Mobile learning",
+              "Puzzle-based learning",
+              "Project-based Learning",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-7 (slide no.32-62) for better understanding."
+          },
+          {
+            week: 7,
+            question: "In ____ model of blended learning, most learning is done in the online environment; face-to-face teaching is still available, but for small groups / individuals on a requirement basis.",
+            options: [
+              "online lab",
+              "rotation",
+              "flex",
+              "self-blend",
+              "online driver"
+            ],
+            correctAnswer: "flex",
+            solution: "Please go through lecture notes of week-7 (slide no.75) for better understanding."
+          },
+
+          // Week 8
+          {
+            week: 8,
+            question: "Turnaround Leadership brings together a distinct profile of ____ & cognitive ability",
+            options: [
+              "emotional intelligence",
+              "musical intelligence",
+              "spatial intelligence",
+              "naturalistic intelligence",
+              "none of the above"
+            ],
+            correctAnswer: "emotional intelligence",
+            solution: "Please go through lecture notes of week-8 (slide no.03) for better understanding."
+          },
+          {
+            week: 8,
+            question: "Which of the following is a role taken up by turnaround leaders?",
+            options: [
+              "Learn",
+              "Teach",
+              "Model",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-8 (slide no.07) for better understanding."
+          },
+          {
+            week: 8,
+            question: "____ means possessing requisite capacity & knowledge required for management, possessing the key skills & knowledge required to deliver the tasks that make up the specific job",
+            options: [
+              "Competence",
+              "Interest",
+              "Cognitive capacity",
+              "Creative intelligence",
+              "None of the above"
+            ],
+            correctAnswer: "Competence",
+            solution: "Please go through lecture notes of week-8 (slide no.12) for better understanding."
+          },
+          {
+            week: 8,
+            question: "Which of the following is not a dimension of the 'Turnaround Academic Leadership Capability Framework'?",
+            options: [
+              "Personal capabilities",
+              "Interpersonal capabilities",
+              "Cognitive capabilities",
+              "Role-specific competencies",
+              "Athletic competencies"
+            ],
+            correctAnswer: "Athletic competencies",
+            solution: "Please go through lecture notes of week-8 (slide no.14) for better understanding."
+          },
+          {
+            week: 8,
+            question: "ICT for supporting learning on-line courses for distance - learning through",
+            options: [
+              "multimedia resources",
+              "e-conferencing & video conferences",
+              "discussion forums",
+              "live lectures (Video streaming)",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-8 (slide no.40) for better understanding."
+          },
+          {
+            week: 8,
+            question: "Turnaround leaders can manage relationships with stakeholders through",
+            options: [
+              "Building a sustainable learning community",
+              "Monitoring & self-evaluation",
+              "Networking with other agencies",
+              "Performance evaluation & management",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-8 (slide no.20) for better understanding."
+          },
+          {
+            week: 8,
+            question: "____ is the term for using a combination of competition & cooperation for bringing change within the system",
+            options: [
+              "Compete-eration",
+              "Co-opetitions",
+              "Collaborative competition",
+              "Combinative cooperation",
+              "None of the above"
+            ],
+            correctAnswer: "Co-opetitions",
+            solution: "Please go through lecture notes of week-8 (slide no.22) for better understanding."
+          },
+          {
+            week: 8,
+            question: "Which of the following is not an attitude under the 'Entrepreneurship Competencies Model'?",
+            options: [
+              "Self-efficacy",
+              "Proactiveness",
+              "Procrastination",
+              "Innovativeness",
+              "Perseverance"
+            ],
+            correctAnswer: "Procrastination",
+            solution: "Please go through lecture notes of week-8 (slide no.27) for better understanding."
+          },
+          {
+            week: 8,
+            question: "____ is a factor in the 'Academic Entrepreneurship-cum-Performance' model",
+            options: [
+              "Academic mindset",
+              "Academic perseverance",
+              "Academic behaviors",
+              "Social skills",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-8 (slide no.28) for better understanding."
+          },
+          {
+            week: 8,
+            question: "By taking the role of a ____, educational entrepreneurs demonstrate what is possible when resources are used differently & point the way toward how policy & practice might be changed in the light of what they accomplish",
+            options: [
+              "change agent",
+              "content agent",
+              "context agent",
+              "private agent",
+              "none of the above"
+            ],
+            correctAnswer: "change agent",
+            solution: "Please go through lecture notes of week-8 (slide no.22) for better understanding."
+          },
+
+          // Week 9
+          {
+            week: 9,
+            question: "____ refers to independent learning where students learn at their own pace in different times and spaces.",
+            options: [
+              "whenever and wherever learning",
+              "synchronous learning",
+              "asynchronous learning",
+              "paced learning",
+              "none of the above"
+            ],
+            correctAnswer: "asynchronous learning",
+            solution: "Please go through lecture notes of week-9 (slide no.04-06) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Zoom, MS Teams or Google meet classes held during the pandemic refer to ____ type of learning.",
+            options: [
+              "synchronous learning",
+              "asynchronous learning",
+              "synthetic learning",
+              "none of the above"
+            ],
+            correctAnswer: "synchronous learning",
+            solution: "Please go through lecture notes of week-9 (slide no.05-07) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Which of the following is true regarding teachers' role in online learning during the pandemic?",
+            options: [
+              "Increased focus on individual needs and learning styles",
+              "Increased expectancy to be available for students",
+              "Encourage collaboration for motivation",
+              "Encourage higher participation through creative methods",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-9 (slide no.08-10) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Which of the following is not an effective way to motivate online learners?",
+            options: [
+              "Establishing a sense of social isolation",
+              "Online collaboration",
+              "Prompt feedback",
+              "Designing and organizing activities"
+            ],
+            correctAnswer: "Establishing a sense of social isolation",
+            solution: "Please go through lecture notes of week-9 (slide no.10-12) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Which of the following is not a component of the 3Cs useful in the post-pandemic new normal education setting?",
+            options: [
+              "Consistency",
+              "Caste",
+              "Creativity",
+              "Community"
+            ],
+            correctAnswer: "Caste",
+            solution: "Please go through lecture notes of week-9 (slide no.13-15) for better understanding."
+          },
+          {
+            week: 9,
+            question: "High levels of digital task engagement may result in",
+            options: [
+              "conceptual change",
+              "psychological well being",
+              "improved understanding about students'",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-9 (slide no.16-18) for better understanding"
+          },
+          {
+            week: 9,
+            question: "Which of the following does not come under the 5E framework in the context of online flipped classes?",
+            options: [
+              "engage",
+              "evacuate",
+              "explore",
+              "explain",
+              "evaluate"
+            ],
+            correctAnswer: "evacuate",
+            solution: "Please go through lecture notes of week-9 (slide no.18-22) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Effective feedback is",
+            options: [
+              "specific",
+              "descriptive",
+              "student-initiated",
+              "time appropriate",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-9 (slide no.23-25) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Mid-term and end-term exams are types of",
+            options: [
+              "summative assessment",
+              "collective assessment",
+              "formative assessment",
+              "none of the above"
+            ],
+            correctAnswer: "summative assessment",
+            solution: "Please go through lecture notes of week-9 (slide no.26-38) for better understanding."
+          },
+          {
+            week: 9,
+            question: "Before feedback can be given, ____ clarifies learning intentions for students and sets the context for feedback.",
+            options: [
+              "feed-up",
+              "feedback loop",
+              "feed-forward",
+              "none of the above"
+            ],
+            correctAnswer: "feed-up",
+            solution: "Please go through lecture notes of week-9 (slide no.48-50) for better understanding."
+          },
+
+          // Week 10
+          {
+            week: 10,
+            question: "Andragogy means the understanding of the science and practice of",
+            options: [
+              "adult learning",
+              "children learning",
+              "women learning",
+              "none of the above"
+            ],
+            correctAnswer: "adult learning",
+            solution: "Please go through lecture notes of week-10 (slide no.02-03) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Which of the following is not a principle of andragogy?",
+            options: [
+              "self-direction",
+              "experience",
+              "mentorship",
+              "transformation",
+              "physical orientation"
+            ],
+            correctAnswer: "physical orientation",
+            solution: "Please go through lecture notes of week-10 (slide no.05-07) for better understanding."
+          },
+          {
+            week: 10,
+            question: "The best micro-learning content is",
+            options: [
+              "under 6 minutes",
+              "focused on a single concept",
+              "specific to an objective",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-10 (slide no.14-15) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Which of the following is not among the key metrics to show which courses are engaging learners, and which could use an instructional-design rethink?",
+            options: [
+              "total time spent learning",
+              "learner progress",
+              "qualitative feedback",
+              "assessment breakdowns",
+              "number of books purchased by learner"
+            ],
+            correctAnswer: "number of books purchased by learner",
+            solution: "Please go through lecture notes of week-10 (slide no.16-17) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Learning transfer is a process of",
+            options: [
+              "rote learning, memorizing and processing",
+              "memorizing, resting and applying",
+              "internalizing, ignoring, processing",
+              "comprehending, evaluating, applying",
+              "internalizing, comprehending and applying"
+            ],
+            correctAnswer: "internalizing, comprehending and applying",
+            solution: "Please go through lecture notes of week-10 (slide no.20-23) for better understanding."
+          },
+          {
+            week: 10,
+            question: "The solution for the learning need of willingness is",
+            options: [
+              "just-in-time learning",
+              "learner-analytics",
+              "social learning environment",
+              "transferable skills"
+            ],
+            correctAnswer: "transferable skills",
+            solution: "Please go through lecture notes of week-10 (slide no.22-26) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Which of the following is a benefit of using LMS for self-paced learning?",
+            options: [
+              "collaborative social learning tools",
+              "chatting about ideas",
+              "useful resources",
+              "discussing difficult chapters",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-10 (slide no.25-27) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Which of the following is not used to fulfill the need for learning by doing?",
+            options: [
+              "simulations",
+              "animations",
+              "interactive-activities",
+              "experiential exercises",
+              "lectures"
+            ],
+            correctAnswer: "lectures",
+            solution: "Please go through lecture notes of week-10 (slide no.30-31) for better understanding."
+          },
+          {
+            week: 10,
+            question: "____ is also called \"Self-determined Learning\".",
+            options: [
+              "Heutagogy",
+              "Pedagogy",
+              "Ontology",
+              "Andragogy",
+              "None of the above"
+            ],
+            correctAnswer: "Heutagogy",
+            solution: "Please go through lecture notes of week-10 (slide no.31-35) for better understanding."
+          },
+          {
+            week: 10,
+            question: "Which of the following is an example of lifelong learning?",
+            options: [
+              "developing a skill of cooking",
+              "learning a new language",
+              "learning how to use a new phone",
+              "enrolling in an educational degree",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-10 (slide no.60-65) for better understanding."
+          },
+
+          // Week 11
+          {
+            week: 11,
+            question: "NEP 2020 intends to achieve primarily which of the following Sustainable Development Goals (SDG)?",
+            options: [
+              "SDG 4: Inclusive and equitable quality education",
+              "SDG 6: Clean water and sanitation",
+              "SDG 8: Decent work and economic growth",
+              "none of the above"
+            ],
+            correctAnswer: "SDG 4: Inclusive and equitable quality education",
+            solution: "Please go through lecture notes of week-11 (slide no.02-03) for better understanding."
+          },
+          {
+            week: 11,
+            question: "Which of the following is not included as a stage in the structure recommended by NEP 2020?",
+            options: [
+              "Preparatory",
+              "Foundational",
+              "Secondary",
+              "Middle",
+              "Senior"
+            ],
+            correctAnswer: "Senior",
+            solution: "Please go through lecture notes of week-11 (slide no.02-05) for better understanding."
+          },
+          {
+            week: 11,
+            question: "What is the full form of NTA?",
+            options: [
+              "New Testing Act",
+              "National Testing Act",
+              "New Testing Agency",
+              "National Testing Agency",
+              "None of the above"
+            ],
+            correctAnswer: "National Testing Agency",
+            solution: "Please go through lecture notes of week-11 (slide no.06-07) for better understanding."
+          },
+          {
+            week: 11,
+            question: "In higher education system, the expected student-faculty ratio is",
+            options: [
+              "2:1",
+              "5:1",
+              "10:1",
+              "20:1",
+              "30:1"
+            ],
+            correctAnswer: "30:1",
+            solution: "Please go through lecture notes of week-11 (slide no.07-08) for better understanding."
+          },
+          {
+            week: 11,
+            question: "Which of the following is not a merit of higher education policies in NΕΡ 2020?",
+            options: [
+              "student-centric",
+              "bureaucratic",
+              "autonomic",
+              "research and innovation focused"
+            ],
+            correctAnswer: "bureaucratic",
+            solution: "Please go through lecture notes of week-11 (slide no.16-17) for better understanding."
+          },
+          {
+            week: 11,
+            question: "Contemplative education is a philosophy of higher education that integrates ____ and ____ into academic study.",
+            options: [
+              "introspection and passive learning",
+              "networking and experiential learning",
+              "passive learning and assessment",
+              "introspection and experiential learning"
+            ],
+            correctAnswer: "introspection and experiential learning",
+            solution: "Please go through lecture notes of week-11 (slide no.18-19) for better understanding."
+          },
+          {
+            week: 11,
+            question: "Broadly, there are ____ main ways that contemplative practices are incorporated",
+            options: [
+              "two",
+              "three",
+              "ten",
+              "five",
+              "fifteen"
+            ],
+            correctAnswer: "three",
+            solution: "Please go through lecture notes of week-11 (slide no.18-20) for better understanding."
+          },
+          {
+            week: 11,
+            question: "SEL stands for",
+            options: [
+              "self-efficacy in learning",
+              "social effective learning",
+              "standard emotional learning",
+              "social-emotional learning"
+            ],
+            correctAnswer: "social-emotional learning",
+            solution: "Please go through lecture notes of week-11 (slide no.27-30) for better understanding."
+          },
+          {
+            week: 11,
+            question: "Open awareness (in the context of mindfulness) is also known as",
+            options: [
+              "open systems",
+              "open mindedness",
+              "openness",
+              "open monitoring"
+            ],
+            correctAnswer: "open monitoring",
+            solution: "Please go through lecture notes of week-11 (slide no.37-40) for better understanding."
+          },
+          {
+            week: 11,
+            question: "____ component of transformative learning refers to experiences narrated/explained in a logical and rational manner that can bring about transformative learning.",
+            options: [
+              "rational disclosure",
+              "critical reflection",
+              "centrality of experience",
+              "disorienting dilemma",
+              "none of the above"
+            ],
+            correctAnswer: "rational disclosure",
+            solution: "Please go through lecture notes of week-11 (slide no.43-45) for better understanding."
+          },
+
+          // Week 12
+          {
+            week: 12,
+            question: "The Sustainable Development Goals (SDGs), were adopted by all United Nations Member States in",
+            options: [
+              "2015",
+              "2010",
+              "2019",
+              "2022",
+              "2023"
+            ],
+            correctAnswer: "2015",
+            solution: "Please go through lecture notes of week-12 (slide no.02) for better understanding."
+          },
+          {
+            week: 12,
+            question: "SDGs replaced MDGs. In this context, what is the full form of 'MDGs'?",
+            options: [
+              "Massive Development Goals",
+              "Millennium Development Goals",
+              "Micro Development Goals",
+              "None of the above"
+            ],
+            correctAnswer: "Millennium Development Goals",
+            solution: "Please go through lecture notes of week-12 (slide no.04-06) for better understanding."
+          },
+          {
+            week: 12,
+            question: "The aim of SDG 2 is",
+            options: [
+              "end hunger",
+              "achieve food security",
+              "achieve improved nutrition",
+              "promote sustainable agriculture",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-12 (slide no.09-10) for better understanding."
+          },
+          {
+            week: 12,
+            question: "Which SDG focuses on investing in solar, wind and thermal power, improving energy productivity, and ensuring energy for all",
+            options: [
+              "Goal 5",
+              "Goal 6",
+              "Goal 7",
+              "Goal 8",
+              "Goal 9"
+            ],
+            correctAnswer: "Goal 7",
+            solution: "Please go through lecture notes of week-12 (slide no.18-19) for better understanding."
+          },
+          {
+            week: 12,
+            question: "SDG 4 has been broken down into ____ number of targets based on the different roles to be fulfilled by different players in the institution",
+            options: [
+              "two",
+              "five",
+              "seven",
+              "ten"
+            ],
+            correctAnswer: "ten",
+            solution: "Please go through lecture notes of week-12 (slide no.30-31) for better understanding."
+          },
+          {
+            week: 12,
+            question: "Which of the following is an essential characteristic of ESD?",
+            options: [
+              "promotes lifelong learning",
+              "is culturally appropriate",
+              "engages formal, non-formal and informal education",
+              "is interdisciplinary",
+              "All of the above"
+            ],
+            correctAnswer: "All of the above",
+            solution: "Please go through lecture notes of week-12 (slide no.38-39) for better understanding."
+          },
+          {
+            week: 12,
+            question: "GCED is a strategic area of UNESCO's Education Sector programme and builds on the work of Peace and Human Rights Education. GCED stands for",
+            options: [
+              "Global Competitive Education and Development",
+              "Global Citizenship Education",
+              "Global Citizenship Education and Development",
+              "None of the above"
+            ],
+            correctAnswer: "Global Citizenship Education",
+            solution: "Please go through lecture notes of week-12 (slide no.42-44) for better understanding."
+          },
+          {
+            week: 12,
+            question: "Under the GCED umbrella, UNESCO has several special themes. Which of the following is included in them?",
+            options: [
+              "promotion of the rule of law through global citizenship education",
+              "preventing violent extremism through education, Education",
+              "Languages in education",
+              "all of the above"
+            ],
+            correctAnswer: "all of the above",
+            solution: "Please go through lecture notes of week-12 (slide no.44-46) for better understanding."
+          },
+          {
+            week: 12,
+            question: "In general citizenship education should result in educated people with certain characteristics. Among them, ____ refers to supporting a certain idea through reasoning.",
+            options: [
+              "advocacy",
+              "conciliation",
+              "representation",
+              "responsibility",
+              "research"
+            ],
+            correctAnswer: "advocacy",
+            solution: "Please go through lecture notes of week-12 (slide no.49-50) for better understanding."
+          },
+          {
+            week: 12,
+            question: "Which of the following is not one of the sustainable leadership skills?",
+            options: [
+              "manage complexity",
+              "communicate vision",
+              "exercise judgment",
+              "challenge and innovate",
+              "think short term for immediate gains"
+            ],
+            correctAnswer: "think short term for immediate gains",
+            solution: "Please go through lecture notes of week-12 (slide no.68-73) for better understanding."
+          }
+        ];
+
+        // --- APPLICATION STATE ---
+        let currentMode = 'menu'; // 'menu', 'practice', 'test'
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = []; // For test mode
+
+        // --- DOM ELEMENTS ---
+        const modeSelectionEl = document.getElementById('mode-selection');
+        const quizContainerEl = document.getElementById('quiz-container');
+        const resultsContainerEl = document.getElementById('results-container');
+        const weekSelectEl = document.getElementById('week-select');
+        const startPracticeBtn = document.getElementById('start-practice');
+        const startTestBtn = document.getElementById('start-test');
+        const quizTitleEl = document.getElementById('quiz-title');
+        const backToMenuBtn = document.getElementById('back-to-menu');
+        const questionProgressEl = document.getElementById('question-progress');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const practiceSolutionAreaEl = document.getElementById('practice-solution-area');
+        const toggleSolutionBtn = document.getElementById('toggle-solution-btn');
+        const solutionTextEl = document.getElementById('solution-text');
+        const prevQuestionBtn = document.getElementById('prev-question');
+        const nextQuestionBtn = document.getElementById('next-question');
+        const submitTestBtn = document.getElementById('submit-test');
+        const scoreTextEl = document.getElementById('score-text');
+        const scorePercentageEl = document.getElementById('score-percentage');
+        const resultsBreakdownEl = document.getElementById('results-breakdown');
+        const restartQuizBtn = document.getElementById('restart-quiz');
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Initializes the application when the DOM is loaded.
+         */
+        function initializeApp() {
+            populateWeekSelector();
+            
+            // --- Event Listeners ---
+            startPracticeBtn.addEventListener('click', () => startQuiz('practice'));
+            startTestBtn.addEventListener('click', () => startQuiz('test'));
+            
+            backToMenuBtn.addEventListener('click', showMenu);
+            restartQuizBtn.addEventListener('click', showMenu);
+            
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            prevQuestionBtn.addEventListener('click', prevQuestion);
+            
+            submitTestBtn.addEventListener('click', submitTest);
+            toggleSolutionBtn.addEventListener('click', toggleSolution);
+        }
+
+        /**
+         * Populates the week selection dropdown.
+         */
+        function populateWeekSelector() {
+            // Find unique weeks
+            const weeks = [...new Set(quizData.map(q => q.week))].sort((a, b) => a - b);
+            
+            weeks.forEach(week => {
+                const option = document.createElement('option');
+                option.value = week;
+                option.textContent = `Week ${week}`;
+                weekSelectEl.appendChild(option);
+            });
+        }
+
+        /**
+         * Starts the quiz in the selected mode ('practice' or 'test').
+         */
+        function startQuiz(mode) {
+            currentMode = mode;
+            const selectedWeek = weekSelectEl.value;
+            
+            // Filter questions based on selected week
+            if (selectedWeek === 'all') {
+                currentQuestions = [...quizData];
+            } else {
+                currentQuestions = quizData.filter(q => q.week == selectedWeek);
+            }
+
+            // Shuffle the questions for variety
+            currentQuestions = shuffleArray(currentQuestions);
+
+            // Reset state
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            
+            // Update UI
+            modeSelectionEl.classList.add('hidden');
+            resultsContainerEl.classList.add('hidden');
+            quizContainerEl.classList.remove('hidden');
+            
+            quizTitleEl.textContent = `${mode === 'practice' ? 'Practice' : 'Test'} Mode: ${weekSelectEl.options[weekSelectEl.selectedIndex].text}`;
+            
+            // Configure UI for the specific mode
+            if (currentMode === 'practice') {
+                practiceSolutionAreaEl.classList.remove('hidden');
+                submitTestBtn.classList.add('hidden');
+                nextQuestionBtn.classList.remove('hidden');
+            } else { // Test mode
+                practiceSolutionAreaEl.classList.add('hidden');
+                submitTestBtn.classList.add('hidden'); // Hide until last question
+                nextQuestionBtn.classList.remove('hidden');
+            }
+
+            displayQuestion();
+        }
+
+        /**
+         * Displays the current question and options.
+         */
+        function displayQuestion() {
+            // Get current question
+            const question = currentQuestions[currentQuestionIndex];
+            
+            // Update question text and progress
+            questionTextEl.innerHTML = question.question; // Use innerHTML to render any potential formatting
+            questionProgressEl.textContent = `Question ${currentQuestionIndex + 1} of ${currentQuestions.length}`;
+
+            // Clear old options
+            optionsContainerEl.innerHTML = '';
+            
+            // Create and display new option buttons
+            question.options.forEach(optionText => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.classList.add('option-btn', 'w-full', 'text-left', 'p-4', 'border-2', 'border-gray-300', 'rounded-lg', 'transition-colors', 'duration-200', 'hover:bg-gray-100', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-300');
+                
+                button.addEventListener('click', () => handleOptionSelect(optionText, button));
+                
+                // If in test mode, check if this option was previously selected
+                if (currentMode === 'test' && userAnswers[currentQuestionIndex] === optionText) {
+                    button.classList.add('selected');
+                }
+                
+                optionsContainerEl.appendChild(button);
+            });
+
+            // Handle practice mode solution state
+            if (currentMode === 'practice') {
+                solutionTextEl.classList.add('hidden');
+                solutionTextEl.innerHTML = `<strong>Solution:</strong> ${question.solution}`;
+                toggleSolutionBtn.textContent = 'Show Solution';
+                toggleSolutionBtn.classList.remove('hidden');
+            }
+
+            // Update navigation buttons
+            updateNavButtons();
+        }
+
+        /**
+         * Handles the logic when a user clicks an option.
+         */
+        function handleOptionSelect(selectedOption, selectedButton) {
+            const question = currentQuestions[currentQuestionIndex];
+            const isCorrect = (selectedOption === question.correctAnswer);
+
+            if (currentMode === 'practice') {
+                // Practice mode: Give immediate feedback
+                
+                // Disable all buttons
+                const buttons = optionsContainerEl.querySelectorAll('.option-btn');
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    // Find and highlight the correct answer
+                    if (btn.textContent === question.correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+
+                // Style the selected button
+                if (isCorrect) {
+                    selectedButton.classList.add('correct');
+                } else {
+                    selectedButton.classList.add('incorrect');
+                }
+                
+                // Automatically show solution
+                toggleSolution(true); // Force show
+                
+            } else {
+                // Test mode: Store answer and update UI
+                userAnswers[currentQuestionIndex] = selectedOption;
+                
+                // Remove 'selected' from all buttons and add to the clicked one
+                const buttons = optionsContainerEl.querySelectorAll('.option-btn');
+                buttons.forEach(btn => btn.classList.remove('selected'));
+                selectedButton.classList.add('selected');
+            }
+        }
+
+        /**
+         * Updates the state of the 'Previous', 'Next', and 'Submit' buttons.
+         */
+        function updateNavButtons() {
+            // Handle 'Previous' button
+            if (currentQuestionIndex === 0) {
+                prevQuestionBtn.disabled = true;
+                prevQuestionBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevQuestionBtn.disabled = false;
+                prevQuestionBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            // Handle 'Next' and 'Submit' buttons
+            if (currentQuestionIndex === currentQuestions.length - 1) {
+                // Last question
+                nextQuestionBtn.classList.add('hidden');
+                if (currentMode === 'test') {
+                    submitTestBtn.classList.remove('hidden');
+                }
+            } else {
+                // Not last question
+                nextQuestionBtn.classList.remove('hidden');
+                if (currentMode === 'test') {
+                    submitTestBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        /**
+         * Toggles the visibility of the solution in Practice Mode.
+         */
+        function toggleSolution(forceShow = false) {
+            if (forceShow) {
+                solutionTextEl.classList.remove('hidden');
+                toggleSolutionBtn.textContent = 'Hide Solution';
+            } else {
+                const isHidden = solutionTextEl.classList.toggle('hidden');
+                toggleSolutionBtn.textContent = isHidden ? 'Show Solution' : 'Hide Solution';
+            }
+        }
+
+        /**
+         * Navigates to the next question.
+         */
+        function nextQuestion() {
+            if (currentQuestionIndex < currentQuestions.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+        
+        /**
+         * Navigates to the previous question.
+         */
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        /**
+         * Submits the test, calculates, and displays results.
+         */
+        function submitTest() {
+            let score = 0;
+            resultsBreakdownEl.innerHTML = ''; // Clear previous results
+
+            currentQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = (userAnswer === question.correctAnswer);
+                
+                if (isCorrect) {
+                    score++;
+                }
+
+                // Create HTML for results breakdown
+                const resultHtml = `
+                    <div class="p-4 rounded-lg ${isCorrect ? 'bg-green-50' : 'bg-red-50'} border ${isCorrect ? 'border-green-200' : 'border-red-200'}">
+                        <p class="font-semibold text-gray-800 mb-2"><strong>Q${index + 1}:</strong> ${question.question}</p>
+                        <p class="text-sm ${isCorrect ? 'text-green-700' : 'text-red-700'}">
+                            <strong>Your Answer:</strong> ${userAnswer || 'No answer'}
+                            ${isCorrect ? '<span> &check;</span>' : '<span> &cross;</span>'}
+                        </p>
+                        ${!isCorrect ? `
+                            <p class="text-sm text-green-700"><strong>Correct Answer:</strong> ${question.correctAnswer}</p>
+                        ` : ''}
+                        <p class="text-sm text-gray-600 mt-2 pt-2 border-t border-gray-300"><strong>Solution:</strong> ${question.solution}</p>
+                    </div>
+                `;
+                resultsBreakdownEl.innerHTML += resultHtml;
+            });
+
+            // Calculate and display score
+            const percentage = Math.round((score / currentQuestions.length) * 100);
+            scoreTextEl.textContent = `${score} / ${currentQuestions.length}`;
+            scorePercentageEl.textContent = `(${percentage}%)`;
+
+            // Change color based on score
+            if (percentage >= 70) {
+                scoreTextEl.className = 'text-6xl font-extrabold text-green-600';
+            } else if (percentage >= 40) {
+                scoreTextEl.className = 'text-6xl font-extrabold text-yellow-600';
+            } else {
+                scoreTextEl.className = 'text-6xl font-extrabold text-red-600';
+            }
+
+            // Show results screen
+            quizContainerEl.classList.add('hidden');
+            resultsContainerEl.classList.remove('hidden');
+        }
+
+        /**
+         * Returns to the main menu screen.
+         */
+        function showMenu() {
+            resultsContainerEl.classList.add('hidden');
+            quizContainerEl.classList.add('hidden');
+            modeSelectionEl.classList.remove('hidden');
+        }
+
+        /**
+         * Shuffles an array in place.
+         * @param {Array} array The array to shuffle.
+         * @returns {Array} The shuffled array.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- START THE APP ---
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+    </script>
+</body>
+</html>
