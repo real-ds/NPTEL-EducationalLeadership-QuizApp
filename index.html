@@ -2298,8 +2298,11 @@
             // Clear old options
             optionsContainerEl.innerHTML = '';
             
+            // Shuffle the options before displaying
+            const shuffledOptions = shuffleArray([...question.options]);
+            
             // Create and display new option buttons
-            question.options.forEach(optionText => {
+            shuffledOptions.forEach(optionText => {
                 const button = document.createElement('button');
                 button.textContent = optionText;
                 button.classList.add('option-btn');
